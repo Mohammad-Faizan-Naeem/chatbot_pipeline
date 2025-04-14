@@ -9,8 +9,12 @@ from transformers import AutoTokenizer, AutoModelForSequenceClassification, pipe
 import torch
 from peft import PeftModel ,PeftConfig
 from transformers import BitsAndBytesConfig
+from huggingface_hub import login
 import os
 from accelerate import dispatch_model
+
+HUGGINGFACE_TOKEN = "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"
+login(token=HUGGINGFACE_TOKEN)
 
 #load the customer service intent
 with open("customer_intents.txt", "r") as file:
