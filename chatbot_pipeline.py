@@ -13,14 +13,14 @@ import os
 from accelerate import dispatch_model
 
 #load the customer service intent
-with open("/content/drive/MyDrive/Colab Notebooks/chatbot_pipeline/customer_intents.txt", "r") as file:
+with open("customer_intents.txt", "r") as file:
     customer_intents = set(line.strip().lower() for line in file)
 
 # Load label encoder
-with open("/content/drive/MyDrive/Colab Notebooks/chatbot_pipeline/label_encoder.pkl", "rb") as f:
+with open("label_encoder.pkl", "rb") as f:
     label_encoder = pickle.load(f)
 
-humen_df=pd.read_csv("/content/drive/MyDrive/Colab Notebooks/chatbot_pipeline/humen_intents.csv")
+humen_df=pd.read_csv("humen_intents.csv")
 quant_config = BitsAndBytesConfig(load_in_4bit=True)
 
 
@@ -28,23 +28,23 @@ device ="cuda" if torch.cuda.is_available() else "cpu"
 print(f"Using device: {device}")
 
 #load the sentence transformer model
-retrieve_model = SentenceTransformer("/content/drive/MyDrive/Colab Notebooks/chatbot_pipeline/sentence_transformer_model").to(device)
-instruction_embeddings = np.load("/content/drive/MyDrive/Colab Notebooks/chatbot_pipeline/instruction_embeddings.npy")
-response_embeddings = np.load("/content/drive/MyDrive/Colab Notebooks/chatbot_pipeline/response_embeddings.npy")
-faiss_index = faiss.read_index("/content/drive/MyDrive/Colab Notebooks/chatbot_pipeline/instruction_index.faiss")
+retrieve_model = SentenceTransformer("sentence_transformer_model").to(device)
+instruction_embeddings = np.load("instruction_embeddings.npy")
+response_embeddings = np.load("response_embeddings.npy")
+faiss_index = faiss.read_index("instruction_index.faiss")
 
 
 os.environ["WANDB_DISABLED"] = "true"
 
 
 #load the responses for retrieval
-cleaned_texts=pd.read_parquet("/content/drive/MyDrive/Colab Notebooks/chatbot_pipeline/cleaned_texts.parquet")
+cleaned_texts=pd.read_parquet("cleaned_texts.parquet")
 responses = cleaned_texts["response"].tolist()
 
 
 #load the intent classification model
-intent_model=AutoModelForSequenceClassification.from_pretrained("/content/drive/MyDrive/Colab Notebooks/chatbot_pipeline/intent_classification_model").to(device)
-intent_tokenizer=AutoTokenizer.from_pretrained("/content/drive/MyDrive/Colab Notebooks/chatbot_pipeline/intent_classification_model")
+intent_model=AutoModelForSequenceClassification.from_pretrained("intent_classification_model").to(device)
+intent_tokenizer=AutoTokenizer.from_pretrained("intent_classification_model")
 
 
 base_model_name = "meta-llama/Llama-3.2-1B"
@@ -55,7 +55,7 @@ base_model = AutoModelForCausalLM.from_pretrained(
     trust_remote_code=True
 )
 llama_tokenizer = AutoTokenizer.from_pretrained(base_model_name)
-lora_model_path = "/content/drive/MyDrive/Colab Notebooks/chatbot_pipeline/llama_finetuned_model"
+lora_model_path = "llama_finetuned_model"
 config = PeftConfig.from_pretrained(lora_model_path)
 llama_model = PeftModel.from_pretrained(base_model, lora_model_path, config=config , is_trainable=True)
 
