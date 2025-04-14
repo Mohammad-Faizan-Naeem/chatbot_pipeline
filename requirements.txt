@@ -13,3 +13,5 @@ accelerate
 bitsandbytes
 huggingface_hub
 safetensors
+torchvision
+torchaudio
