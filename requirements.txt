@@ -10,3 +10,4 @@ numpy
 pyarrow
 protobuf<4.0.0
 accelerate
+bitsandbytes
